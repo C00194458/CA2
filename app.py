@@ -1,65 +1,61 @@
-from flask import Flask, render_template, request  # from module import Class.
-
-
-import os 
+import os
+from flask import Flask, render_template, request
 
 import hfpy_utils
 import swim_utils
 
-
 app = Flask(__name__)
-
+FOLDER = "swimdata/"
 
 @app.get("/")
-@app.get("/hello")
-def hello():
-    return "Hello from my first web app - cool, isn't it?"  # ANY string.
-
-
-@app.get("/chart")
-def display_chart():
-    (
-        name,
-        age,
-        distance,
-        stroke,
-        the_times,
-        converts,
-        the_average,
-    ) = swim_utils.get_swimmers_data("Darius-13-100m-Fly.txt")
-
-    the_title = f"{name} (Under {age}) {distance} {stroke}"
-    from_max = max(converts) + 50
-    the_converts = [ hfpy_utils.convert2range(n, 0, from_max, 0, 350) for n in converts ]
-
-    the_data = zip(the_converts, the_times)
-
-    return render_template(
-        "chart.html",
-        title=the_title,
-        average=the_average,
-        data=the_data,
-    )
-
-
-@app.get("/getswimmers")
 def get_swimmers_names():
-    files = os.listdir(swim_utils.FOLDER)
+    files = os.listdir(FOLDER)
     files.remove(".DS_Store")
     names = set()
     for swimmer in files:
-        names.add(swim_utils.get_swimmers_data(swimmer)[0])
+        names_parts = swimmer.removesuffix(".txt").split("-")[:2]
+        formatted_name = "-".join(names_parts)
+        names.add(formatted_name)
+
     return render_template(
         "select.html",
-        title="Select a swimmer to chart",
-        data=sorted(names),
+        title = "Select a swimmer",
+        data = sorted(names),
     )
-
 
 @app.post("/displayevents")
 def get_swimmer_events():
-    return request.form["swimmer"]
+    selected_swimmer = request.form["swimmer"]
+    files = os.listdir(FOLDER)
+    swimmer_events = set()
+
+    for swimmer_file in files:
+        if swimmer_file.startswith(selected_swimmer):
+            event_parts = swimmer_file.removesuffix(".txt").split("-")
+            if len(event_parts) >= 3:
+                swimmer_event = "-".join(event_parts[2:])
+                swimmer_events.add(swimmer_event)
+
+    return render_template(
+        "select2.html",
+        title=f"Select an event for {selected_swimmer}",
+        data=sorted(swimmer_events),
+        selected_swimmer = selected_swimmer,
+    )
 
 
+@app.post("/displaychart")
+def display_chart():
+    selected_swimmer = request.form["swimmer"]
+    selected_event = request.form["event"]
+    filename = selected_swimmer + "-" + selected_event + ".txt"
+    
+    chart_data = swim_utils.produce_bar_chart(filename)
+
+    return render_template(
+        "chart.html",
+        chart_data = chart_data
+    )
+    
 if __name__ == "__main__":
-    app.run(debug=True)  # Starts a local (test) webserver, and waits... forever.
+    app.run(debug=True)

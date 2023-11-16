@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+
+    <form method="POST" action="/displaychart">
+        <input type="hidden" name="swimmer" value="{{ selected_swimmer }}">
+        <label for="event">Select an event:</label>
+
+        <select name="event" id="event">
+
+            {% for event in data %}
+
+                <option value="{{ event }}">{{ event }}</option>
+            
+            {% endfor %}
+
+        </select>
+        <p>
+            <input type="submit" value="Select">
+        </p>
+    </form>
+
+{% endblock %}

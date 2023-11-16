@@ -76,8 +76,5 @@ def produce_bar_chart(fn):
                         </body>
                     </html>"""
     page = header + body + footer
-    save_to = f"{fn.removesuffix('.txt')}.html"
-    with open(save_to, "w") as sf:
-        print(page, file=sf)
 
-    return save_to
+    return page
