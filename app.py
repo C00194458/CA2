@@ -7,6 +7,7 @@ import swim_utils
 app = Flask(__name__)
 FOLDER = "swimdata/"
 
+
 @app.get("/")
 def get_swimmers_names():
     files = os.listdir(FOLDER)
@@ -19,9 +20,10 @@ def get_swimmers_names():
 
     return render_template(
         "select.html",
-        title = "Select a swimmer",
-        data = sorted(names),
+        title="Select a swimmer",
+        data=sorted(names),
     )
+
 
 @app.post("/displayevents")
 def get_swimmer_events():
@@ -40,7 +42,7 @@ def get_swimmer_events():
         "select2.html",
         title=f"Select an event for {selected_swimmer}",
         data=sorted(swimmer_events),
-        selected_swimmer = selected_swimmer,
+        selected_swimmer=selected_swimmer,
     )
 
 
@@ -49,13 +51,11 @@ def display_chart():
     selected_swimmer = request.form["swimmer"]
     selected_event = request.form["event"]
     filename = selected_swimmer + "-" + selected_event + ".txt"
-    
+
     chart_data = swim_utils.produce_bar_chart(filename)
 
-    return render_template(
-        "chart.html",
-        chart_data = chart_data
-    )
-    
+    return render_template("chart.html", chart_data=chart_data)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
